@@ -1,0 +1,96 @@
+﻿@model IEnumerable<ClinicAppointmentSystem.Models.Appointment>
+@{
+    ViewData["Title"] = "All Appointments";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="fas fa-calendar-check"></i> All Appointments</h1>
+        <a asp-action="CreateAppointment" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Appointment
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Appointment List</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Appointment ID</th>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Service</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var appointment in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@appointment.AppointmentId</strong>
+                                </td>
+                                <td>@appointment.Patient.FullName</td>
+                                <td>@appointment.Doctor.Name</td>
+                                <td>@appointment.Service.Name</td>
+                                <td>
+                                    @appointment.AppointmentDate.ToString("MMM dd, yyyy")<br>
+                                    <small class="text-muted">@appointment.StartTime.ToString(@"hh\:mm") - @appointment.EndTime.ToString(@"hh\:mm")</small>
+                                </td>
+                                <td>
+                                    <span class="badge
+                                            @(appointment.Status == "Confirmed" ? "bg-success" :
+                                                                                    appointment.Status == "Pending" ? "bg-warning" :
+                                                                                    appointment.Status == "Completed" ? "bg-info" : "bg-danger")">
+                                    @appointment.Status
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    @if (appointment.Status == "Pending" || appointment.Status == "Confirmed")
+                                        {
+                                            <form method="post" asp-action="UpdateAppointmentStatus" class="d-inline">
+                                                <input type="hidden" name="appointmentId" value="@appointment.Id" />
+                                                <input type="hidden" name="status" value="Confirmed" />
+                                                <button type="submit" class="btn btn-success btn-sm"
+                                                        title="Confirm Appointment">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                            <form method="post" asp-action="UpdateAppointmentStatus" class="d-inline">
+                                                <input type="hidden" name="appointmentId" value="@appointment.Id" />
+                                                <input type="hidden" name="status" value="Cancelled" />
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Are you sure you want to cancel this appointment?')"
+                                                        title="Cancel Appointment">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (appointment.Status == "Confirmed")
+                                        {
+                                            <form method="post" asp-action="UpdateAppointmentStatus" class="d-inline">
+                                                <input type="hidden" name="appointmentId" value="@appointment.Id" />
+                                                <input type="hidden" name="status" value="Completed" />
+                                                <button type="submit" class="btn btn-info btn-sm"
+                                                        title="Mark as Completed">
+                                                    <i class="fas fa-flag-checkered"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

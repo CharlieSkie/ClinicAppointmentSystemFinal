@@ -1,0 +1,202 @@
+﻿@model ClinicAppointmentSystem.Models.Appointment
+@{
+    ViewData["Title"] = "Book Appointment";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="fas fa-calendar-plus"></i> Book Appointment</h1>
+        <a asp-controller="Client" asp-action="Dashboard" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Appointment Details</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Book" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="DoctorId" class="control-label">Doctor</label>
+                                    <select asp-for="DoctorId" class="form-control" required>
+                                        <option value="">Select Doctor</option>
+                                        @foreach (var doctor in ViewBag.Doctors)
+                                        {
+                                            <option value="@doctor.Id">@doctor.Name - @doctor.Specialization</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="DoctorId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="ServiceId" class="control-label">Service</label>
+                                    <select asp-for="ServiceId" class="form-control" required>
+                                        <option value="">Select Service</option>
+                                        @foreach (var service in ViewBag.Services)
+                                        {
+                                            <option value="@service.Id" data-duration="@service.DurationMinutes">
+                                                @service.Name - $@service.Price
+                                            </option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="ServiceId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="AppointmentDate" class="control-label">Appointment Date</label>
+                                    <input asp-for="AppointmentDate" type="date" class="form-control"
+                                           min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                                    <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="StartTime" class="control-label">Start Time</label>
+                                    <select asp-for="StartTime" class="form-control" required>
+                                        <option value="">Select Time</option>
+                                        <!-- Time slots will be populated by JavaScript -->
+                                    </select>
+                                    <span asp-validation-for="StartTime" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Notes" class="control-label">Notes (Optional)</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Any special notes or requirements..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-calendar-check"></i> Book Appointment
+                            </button>
+                            <a asp-controller="Client" asp-action="Dashboard" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Booking Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fas fa-info-circle text-primary"></i>
+                            Only one appointment per day allowed
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-clock text-warning"></i>
+                            Book at least 24 hours in advance
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-calendar-times text-danger"></i>
+                            Cancel at least 2 hours before appointment
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-user-md text-success"></i>
+                            Doctor availability varies by day
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title">Available Time Slots</h5>
+                </div>
+                <div class="card-body">
+                    <div id="timeSlotsContainer">
+                        <p class="text-muted">Select a doctor and date to see available time slots.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            var currentDoctorId = null;
+            var currentDate = null;
+
+            // Load time slots when doctor or date changes
+            $('#DoctorId, #AppointmentDate').change(function() {
+                var doctorId = $('#DoctorId').val();
+                var date = $('#AppointmentDate').val();
+
+                if (doctorId && date) {
+                    loadTimeSlots(doctorId, date);
+                }
+            });
+
+            // Auto-calculate end time based on service duration
+            $('#ServiceId').change(function() {
+                updateEndTime();
+            });
+
+            $('#StartTime').change(function() {
+                updateEndTime();
+            });
+
+            function loadTimeSlots(doctorId, date) {
+                $.getJSON('@Url.Action("GetAvailableTimeSlots", "Appointment")', {
+                    doctorId: doctorId,
+                    date: date
+                }, function(data) {
+                    var $timeSelect = $('#StartTime');
+                    $timeSelect.empty().append('<option value="">Select Time</option>');
+
+                    if (data.length > 0) {
+                        $.each(data, function(index, time) {
+                            var timeString = time.substring(0, 5); // Format as HH:mm
+                            $timeSelect.append($('<option>', {
+                                value: timeString,
+                                text: timeString
+                            }));
+                        });
+                        $('#timeSlotsContainer').html('<p class="text-success"><i class="fas fa-check-circle"></i> ' + data.length + ' time slots available</p>');
+                    } else {
+                        $('#timeSlotsContainer').html('<p class="text-danger"><i class="fas fa-exclamation-circle"></i> No available time slots for selected date</p>');
+                    }
+                });
+            }
+
+            function updateEndTime() {
+                var selectedService = $('#ServiceId').find('option:selected');
+                var duration = selectedService.data('duration');
+                var startTime = $('#StartTime').val();
+
+                if (startTime && duration) {
+                    var start = new Date('1970-01-01T' + startTime + 'Z');
+                    var end = new Date(start.getTime() + duration * 60000);
+                    var endTimeString = end.toTimeString().substring(0, 5);
+
+                    // Show end time to user
+                    $('#timeSlotsContainer').append('<p class="text-info">Appointment will end at: ' + endTimeString + '</p>');
+                }
+            }
+        });
+    </script>
+}

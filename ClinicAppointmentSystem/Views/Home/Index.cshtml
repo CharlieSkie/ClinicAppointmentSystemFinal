@@ -1,0 +1,114 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center hero-section">
+    <div class="container">
+        <h1 class="display-4 mb-4">Welcome to Clinic Appointment System</h1>
+        <p class="lead mb-5">Efficient, reliable, and easy-to-use appointment management system for modern healthcare facilities.</p>
+
+        @if (!User.Identity?.IsAuthenticated == true)
+        {
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                                    <h5 class="card-title">New Patient?</h5>
+                                    <p class="card-text">Create an account to book appointments and manage your healthcare needs.</p>
+                                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary">Register Now</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-sign-in-alt fa-3x text-success mb-3"></i>
+                                    <h5 class="card-title">Existing User?</h5>
+                                    <p class="card-text">Login to your account to view appointments and access your dashboard.</p>
+                                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success">Login</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <h4>Welcome back, @User.Identity?.Name!</h4>
+                <p>You are now logged in. Use the navigation menu to access your dashboard.</p>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-primary">Go to Admin Dashboard</a>
+                }
+                else if (User.IsInRole("Staff"))
+                {
+                    <a asp-controller="Staff" asp-action="Dashboard" class="btn btn-primary">Go to Staff Dashboard</a>
+                }
+                else if (User.IsInRole("Client"))
+                {
+                    <a asp-controller="Client" asp-action="Dashboard" class="btn btn-primary">Go to Patient Dashboard</a>
+                }
+            </div>
+        }
+
+        <div class="row mt-5">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-calendar-check fa-2x text-primary"></i>
+                    <h4>Easy Booking</h4>
+                    <p>Book appointments with your preferred doctors in just a few clicks.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-clock fa-2x text-success"></i>
+                    <h4>24/7 Access</h4>
+                    <p>Access your appointments and medical information anytime, anywhere.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <i class="fas fa-bell fa-2x text-warning"></i>
+                    <h4>Smart Reminders</h4>
+                    <p>Get timely reminders for your upcoming appointments.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hero-section {
+        padding: 4rem 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        margin: 2rem 0;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+        .feature-card i {
+            margin-bottom: 1rem;
+        }
+
+    .card {
+        transition: transform 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+</style>
