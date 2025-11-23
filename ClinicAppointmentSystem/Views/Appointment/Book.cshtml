@@ -1,5 +1,4 @@
-﻿@model ClinicAppointmentSystem.Models.Appointment
-@{
+﻿@{
     ViewData["Title"] = "Book Appointment";
 }
 
@@ -11,6 +10,22 @@
         </a>
     </div>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="row">
         <div class="col-md-8">
             <div class="card">
@@ -18,36 +33,28 @@
                     <h5 class="card-title">Appointment Details</h5>
                 </div>
                 <div class="card-body">
-                    <form asp-action="Book" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <!-- SIMPLE HTML FORM -->
+                    <form method="post" action="/Appointment/Book">
+                        @Html.AntiForgeryToken()
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="DoctorId" class="control-label">Doctor</label>
-                                    <select asp-for="DoctorId" class="form-control" required>
+                                    <label class="control-label">Doctor *</label>
+                                    <select name="doctorId" class="form-control" id="DoctorId" required>
                                         <option value="">Select Doctor</option>
                                         @foreach (var doctor in ViewBag.Doctors)
                                         {
                                             <option value="@doctor.Id">@doctor.Name - @doctor.Specialization</option>
                                         }
                                     </select>
-                                    <span asp-validation-for="DoctorId" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="ServiceId" class="control-label">Service</label>
-                                    <select asp-for="ServiceId" class="form-control" required>
-                                        <option value="">Select Service</option>
-                                        @foreach (var service in ViewBag.Services)
-                                        {
-                                            <option value="@service.Id" data-duration="@service.DurationMinutes">
-                                                @service.Name - $@service.Price
-                                            </option>
-                                        }
-                                    </select>
-                                    <span asp-validation-for="ServiceId" class="text-danger"></span>
+                                    <label class="control-label">Appointment Date *</label>
+                                    <input name="appointmentDate" type="date" class="form-control" id="AppointmentDate"
+                                           min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
                                 </div>
                             </div>
                         </div>
@@ -55,28 +62,29 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="AppointmentDate" class="control-label">Appointment Date</label>
-                                    <input asp-for="AppointmentDate" type="date" class="form-control"
-                                           min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
-                                    <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                                    <label class="control-label">Start Time *</label>
+                                    <select name="startTime" class="form-control" id="StartTime" required>
+                                        <option value="">Select Time</option>
+                                        <!-- Time slots will be populated by JavaScript -->
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="StartTime" class="control-label">Start Time</label>
-                                    <select asp-for="StartTime" class="form-control" required>
-                                        <option value="">Select Time</option>
-                                        <!-- Time slots will be populated by JavaScript -->
-                                    </select>
-                                    <span asp-validation-for="StartTime" class="text-danger"></span>
+                                    <label class="control-label">End Time</label>
+                                    <input type="time" class="form-control" id="EndTime" readonly />
+                                    <input type="hidden" name="endTime" id="HiddenEndTime" />
+                                    <small class="form-text text-muted">End time is calculated automatically (30-minute appointments)</small>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Service ID is required but we'll set a default value -->
+                        <input type="hidden" name="serviceId" value="1" />
+
                         <div class="form-group mb-3">
-                            <label asp-for="Notes" class="control-label">Notes (Optional)</label>
-                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Any special notes or requirements..."></textarea>
-                            <span asp-validation-for="Notes" class="text-danger"></span>
+                            <label class="control-label">Notes (Optional)</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Any special notes or requirements..."></textarea>
                         </div>
 
                         <div class="form-group">
@@ -132,69 +140,68 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-
     <script>
-        $(document).ready(function() {
-            var currentDoctorId = null;
-            var currentDate = null;
+        document.addEventListener('DOMContentLoaded', function() {
+            const doctorSelect = document.getElementById('DoctorId');
+            const dateInput = document.getElementById('AppointmentDate');
+            const startTimeSelect = document.getElementById('StartTime');
+            const endTimeInput = document.getElementById('EndTime');
+            const hiddenEndTime = document.getElementById('HiddenEndTime');
+            const timeSlotsContainer = document.getElementById('timeSlotsContainer');
 
             // Load time slots when doctor or date changes
-            $('#DoctorId, #AppointmentDate').change(function() {
-                var doctorId = $('#DoctorId').val();
-                var date = $('#AppointmentDate').val();
+            doctorSelect.addEventListener('change', loadTimeSlots);
+            dateInput.addEventListener('change', loadTimeSlots);
+
+            // Update end time when start time changes
+            startTimeSelect.addEventListener('change', updateEndTime);
+
+            async function loadTimeSlots() {
+                const doctorId = doctorSelect.value;
+                const date = dateInput.value;
 
                 if (doctorId && date) {
-                    loadTimeSlots(doctorId, date);
-                }
-            });
+                    timeSlotsContainer.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading available time slots...';
 
-            // Auto-calculate end time based on service duration
-            $('#ServiceId').change(function() {
-                updateEndTime();
-            });
+                    try {
+                        const response = await fetch(`/Appointment/GetAvailableTimeSlots?doctorId=${doctorId}&date=${date}`);
+                        const data = await response.json();
 
-            $('#StartTime').change(function() {
-                updateEndTime();
-            });
+                        startTimeSelect.innerHTML = '<option value="">Select Time</option>';
 
-            function loadTimeSlots(doctorId, date) {
-                $.getJSON('@Url.Action("GetAvailableTimeSlots", "Appointment")', {
-                    doctorId: doctorId,
-                    date: date
-                }, function(data) {
-                    var $timeSelect = $('#StartTime');
-                    $timeSelect.empty().append('<option value="">Select Time</option>');
-
-                    if (data.length > 0) {
-                        $.each(data, function(index, time) {
-                            var timeString = time.substring(0, 5); // Format as HH:mm
-                            $timeSelect.append($('<option>', {
-                                value: timeString,
-                                text: timeString
-                            }));
-                        });
-                        $('#timeSlotsContainer').html('<p class="text-success"><i class="fas fa-check-circle"></i> ' + data.length + ' time slots available</p>');
-                    } else {
-                        $('#timeSlotsContainer').html('<p class="text-danger"><i class="fas fa-exclamation-circle"></i> No available time slots for selected date</p>');
+                        if (data.length > 0) {
+                            data.forEach(time => {
+                                const timeString = time.substring(0, 5); // Format as HH:mm
+                                const option = document.createElement('option');
+                                option.value = timeString;
+                                option.textContent = timeString;
+                                startTimeSelect.appendChild(option);
+                            });
+                            timeSlotsContainer.innerHTML = `<p class="text-success"><i class="fas fa-check-circle"></i> ${data.length} time slots available</p>`;
+                        } else {
+                            timeSlotsContainer.innerHTML = '<p class="text-danger"><i class="fas fa-exclamation-circle"></i> No available time slots for selected date</p>';
+                        }
+                    } catch (error) {
+                        timeSlotsContainer.innerHTML = '<p class="text-danger"><i class="fas fa-exclamation-circle"></i> Error loading time slots</p>';
+                        console.error('Error loading time slots:', error);
                     }
-                });
+                } else {
+                    timeSlotsContainer.innerHTML = '<p class="text-muted">Select a doctor and date to see available time slots.</p>';
+                }
             }
 
             function updateEndTime() {
-                var selectedService = $('#ServiceId').find('option:selected');
-                var duration = selectedService.data('duration');
-                var startTime = $('#StartTime').val();
-
-                if (startTime && duration) {
-                    var start = new Date('1970-01-01T' + startTime + 'Z');
-                    var end = new Date(start.getTime() + duration * 60000);
-                    var endTimeString = end.toTimeString().substring(0, 5);
-
-                    // Show end time to user
-                    $('#timeSlotsContainer').append('<p class="text-info">Appointment will end at: ' + endTimeString + '</p>');
+                const startTime = startTimeSelect.value;
+                if (startTime) {
+                    // Calculate end time (30 minutes later)
+                    const start = new Date('1970-01-01T' + startTime + 'Z');
+                    const end = new Date(start.getTime() + 30 * 60000); // 30 minutes
+                    const endTimeString = end.toTimeString().substring(0, 5);
+                    endTimeInput.value = endTimeString;
+                    hiddenEndTime.value = endTimeString;
+                } else {
+                    endTimeInput.value = '';
+                    hiddenEndTime.value = '';
                 }
             }
         });

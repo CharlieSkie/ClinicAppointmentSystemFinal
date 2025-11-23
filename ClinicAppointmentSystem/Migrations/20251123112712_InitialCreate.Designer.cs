@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClinicAppointmentSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251122104148_InitialCreate")]
+    [Migration("20251123112712_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -216,7 +216,7 @@ namespace ClinicAppointmentSystem.Migrations
                             Holidays = "[]",
                             MaxAppointmentsPerDay = 1,
                             OpeningTime = new TimeSpan(0, 9, 0, 0, 0),
-                            UpdatedDate = new DateTime(2025, 11, 22, 10, 41, 48, 267, DateTimeKind.Utc).AddTicks(5813)
+                            UpdatedDate = new DateTime(2025, 11, 23, 11, 27, 11, 848, DateTimeKind.Utc).AddTicks(4137)
                         });
                 });
 

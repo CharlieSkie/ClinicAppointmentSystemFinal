@@ -97,6 +97,31 @@ namespace ClinicAppointmentSystem.Controllers
             return RedirectToAction(nameof(UserManagement));
         }
 
+        // ✅ NEW: Delete User
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser?.Id == userId)
+            {
+                TempData["ErrorMessage"] = "You cannot delete your own account.";
+                return RedirectToAction(nameof(UserManagement));
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                await _userManager.DeleteAsync(user);
+                TempData["SuccessMessage"] = "User deleted successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "User not found.";
+            }
+            return RedirectToAction(nameof(UserManagement));
+        }
+
         // Doctor Management
         public async Task<IActionResult> Doctors()
         {
@@ -139,6 +164,33 @@ namespace ClinicAppointmentSystem.Controllers
             return RedirectToAction(nameof(Doctors));
         }
 
+        // ✅ NEW: Delete Doctor
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteDoctor(int id)
+        {
+            var doctor = await _context.Doctors.FindAsync(id);
+            if (doctor != null)
+            {
+                // Check if doctor has appointments
+                var hasAppointments = await _context.Appointments.AnyAsync(a => a.DoctorId == id);
+                if (hasAppointments)
+                {
+                    TempData["ErrorMessage"] = "Cannot delete doctor with existing appointments.";
+                    return RedirectToAction(nameof(Doctors));
+                }
+
+                _context.Doctors.Remove(doctor);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Doctor deleted successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Doctor not found.";
+            }
+            return RedirectToAction(nameof(Doctors));
+        }
+
         // Appointment Management
         public async Task<IActionResult> Appointments()
         {
@@ -168,6 +220,19 @@ namespace ClinicAppointmentSystem.Controllers
                 TempData["ErrorMessage"] = "Appointment not found.";
             }
             return RedirectToAction(nameof(Appointments));
+        }
+
+        // ✅ NEW: View Doctor Schedules
+        public async Task<IActionResult> DoctorSchedules()
+        {
+            var schedules = await _context.Schedules
+                .Include(s => s.Doctor)
+                .Where(s => s.IsActive)
+                .OrderBy(s => s.Doctor.Name)
+                .ThenBy(s => s.DayOfWeek)
+                .ThenBy(s => s.StartTime)
+                .ToListAsync();
+            return View(schedules);
         }
     }
 }

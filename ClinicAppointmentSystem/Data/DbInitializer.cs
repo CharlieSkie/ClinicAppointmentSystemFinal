@@ -64,43 +64,9 @@ namespace ClinicAppointmentSystem.Data
                     Console.WriteLine("ℹ️ Admin user already exists.");
                 }
 
-                // Create sample doctors
-                if (!context.Doctors.Any())
-                {
-                    context.Doctors.AddRange(
-                        new Doctor
-                        {
-                            Name = "Dr. Sarah Johnson",
-                            Specialization = "Cardiology",
-                            Email = "sarah.johnson@clinic.com",
-                            Phone = "555-0101",
-                            IsActive = true,
-                            CreatedDate = DateTime.UtcNow
-                        },
-                        new Doctor
-                        {
-                            Name = "Dr. Michael Chen",
-                            Specialization = "Dermatology",
-                            Email = "michael.chen@clinic.com",
-                            Phone = "555-0102",
-                            IsActive = true,
-                            CreatedDate = DateTime.UtcNow
-                        },
-                        new Doctor
-                        {
-                            Name = "Dr. Emily Davis",
-                            Specialization = "Pediatrics",
-                            Email = "emily.davis@clinic.com",
-                            Phone = "555-0103",
-                            IsActive = true,
-                            CreatedDate = DateTime.UtcNow
-                        }
-                    );
-                    await context.SaveChangesAsync();
-                    Console.WriteLine("✅ Sample doctors created.");
-                }
+                // ✅ REMOVED: Default sample doctors - Admin will add doctors manually
 
-                // Create sample services
+                // Create sample services (keeping for reference, but not used in appointments)
                 if (!context.Services.Any())
                 {
                     context.Services.AddRange(
@@ -133,31 +99,10 @@ namespace ClinicAppointmentSystem.Data
                         }
                     );
                     await context.SaveChangesAsync();
-                    Console.WriteLine("✅ Sample services created.");
+                    Console.WriteLine("✅ Sample services created (for reference).");
                 }
 
-                // Create schedules for doctors
-                if (!context.Schedules.Any())
-                {
-                    var doctors = await context.Doctors.ToListAsync();
-                    foreach (var doctor in doctors)
-                    {
-                        for (int day = 1; day <= 5; day++) // Monday to Friday
-                        {
-                            context.Schedules.Add(new Schedule
-                            {
-                                DoctorId = doctor.Id,
-                                DayOfWeek = (DayOfWeek)day,
-                                StartTime = new TimeSpan(9, 0, 0),
-                                EndTime = new TimeSpan(17, 0, 0),
-                                MaxAppointments = 16,
-                                IsActive = true
-                            });
-                        }
-                    }
-                    await context.SaveChangesAsync();
-                    Console.WriteLine("✅ Doctor schedules created.");
-                }
+                // ✅ REMOVED: Default schedules - Staff will create schedules manually
 
                 Console.WriteLine("🎉 Database initialization completed successfully!");
             }

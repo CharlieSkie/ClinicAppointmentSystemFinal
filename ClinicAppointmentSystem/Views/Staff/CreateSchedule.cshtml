@@ -1,0 +1,139 @@
+﻿@{
+    ViewData["Title"] = "Create Schedule";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="fas fa-plus-circle"></i> Create Schedule</h1>
+        <a href="/Staff/Schedule" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Schedules
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Schedule Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/Staff/CreateSchedule">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="control-label">Doctor *</label>
+                                    <select name="doctorId" class="form-control" required>
+                                        <option value="">Select Doctor</option>
+                                        @foreach (var doctor in ViewBag.Doctors)
+                                        {
+                                            <option value="@doctor.Id">@doctor.Name - @doctor.Specialization</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="control-label">Day of Week *</label>
+                                    <select name="dayOfWeek" class="form-control" required>
+                                        <option value="">Select Day</option>
+                                        <option value="0">Sunday</option>
+                                        <option value="1">Monday</option>
+                                        <option value="2">Tuesday</option>
+                                        <option value="3">Wednesday</option>
+                                        <option value="4">Thursday</option>
+                                        <option value="5">Friday</option>
+                                        <option value="6">Saturday</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="control-label">Start Time *</label>
+                                    <input name="startTime" type="time" class="form-control" required />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="control-label">End Time *</label>
+                                    <input name="endTime" type="time" class="form-control" required />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="control-label">Max Appointments *</label>
+                                    <input name="maxAppointments" type="number" class="form-control" min="1" max="50" value="10" required />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" name="isActive" type="checkbox" value="true" checked /> Active Schedule
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Create Schedule
+                            </button>
+                            <a href="/Staff/Schedule" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Schedule Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fas fa-info-circle text-primary"></i>
+                            Set realistic time slots for each doctor
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-clock text-warning"></i>
+                            Consider appointment duration (typically 30 minutes)
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-users text-success"></i>
+                            Set appropriate max appointments per slot
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-calendar text-info"></i>
+                            Schedules will be visible to patients for booking
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

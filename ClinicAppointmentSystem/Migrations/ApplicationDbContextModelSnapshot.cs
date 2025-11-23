@@ -213,7 +213,7 @@ namespace ClinicAppointmentSystem.Migrations
                             Holidays = "[]",
                             MaxAppointmentsPerDay = 1,
                             OpeningTime = new TimeSpan(0, 9, 0, 0, 0),
-                            UpdatedDate = new DateTime(2025, 11, 22, 10, 41, 48, 267, DateTimeKind.Utc).AddTicks(5813)
+                            UpdatedDate = new DateTime(2025, 11, 23, 11, 27, 11, 848, DateTimeKind.Utc).AddTicks(4137)
                         });
                 });
 

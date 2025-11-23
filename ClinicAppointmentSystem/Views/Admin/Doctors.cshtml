@@ -16,50 +16,71 @@
             <h5 class="card-title mb-0">All Doctors</h5>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Name</th>
-                            <th>Specialization</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var doctor in Model)
-                        {
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No doctors found. Add your first doctor using the "Add Doctor" button.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
                             <tr>
-                                <td>@doctor.Name</td>
-                                <td>@doctor.Specialization</td>
-                                <td>@doctor.Email</td>
-                                <td>@doctor.Phone</td>
-                                <td>
-                                    @if (doctor.IsActive)
-                                    {
-                                        <span class="badge bg-success">Active</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Inactive</span>
-                                    }
-                                </td>
-                                <td>
-                                    <form method="post" asp-action="ToggleDoctorStatus" class="d-inline">
-                                        <input type="hidden" name="id" value="@doctor.Id" />
-                                        <button type="submit" class="btn @(doctor.IsActive ? "btn-warning" : "btn-success") btn-sm">
-                                            <i class="fas @(doctor.IsActive ? "fa-toggle-off" : "fa-toggle-on")"></i>
-                                            @(doctor.IsActive ? "Deactivate" : "Activate")
-                                        </button>
-                                    </form>
-                                </td>
+                                <th>Name</th>
+                                <th>Specialization</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            @foreach (var doctor in Model)
+                            {
+                                <tr>
+                                    <td>@doctor.Name</td>
+                                    <td>
+                                        <span class="badge bg-info">@doctor.Specialization</span>
+                                    </td>
+                                    <td>@doctor.Email</td>
+                                    <td>@doctor.Phone</td>
+                                    <td>
+                                        @if (doctor.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <form method="post" asp-action="ToggleDoctorStatus" class="d-inline">
+                                                <input type="hidden" name="id" value="@doctor.Id" />
+                                                <button type="submit" class="btn @(doctor.IsActive ? "btn-warning" : "btn-success") btn-sm">
+                                                    <i class="fas @(doctor.IsActive ? "fa-toggle-off" : "fa-toggle-on")"></i>
+                                                    @(doctor.IsActive ? "Deactivate" : "Activate")
+                                                </button>
+                                            </form>
+                                            <!-- ✅ NEW: Delete Doctor Button -->
+                                            <form method="post" asp-action="DeleteDoctor" class="d-inline">
+                                                <input type="hidden" name="id" value="@doctor.Id" />
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Are you sure you want to delete this doctor? This action cannot be undone.')">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -80,7 +101,13 @@
                     </div>
                     <div class="mb-3">
                         <label for="specialization" class="form-label">Specialization</label>
-                        <input type="text" class="form-control" id="specialization" name="Specialization" required>
+                        <select class="form-control" id="specialization" name="Specialization" required>
+                            <option value="">Select Specialization</option>
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Dermatology">Dermatology</option>
+                            <option value="Pediatrics">Pediatrics</option>
+                            <option value="Dental">Dental</option>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>

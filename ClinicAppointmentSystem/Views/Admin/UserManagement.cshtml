@@ -54,32 +54,42 @@
                                     }
                                 </td>
                                 <td>
-                                    @if (!user.IsApproved)
-                                    {
-                                        <form method="post" asp-action="ApproveUser" class="d-inline">
-                                            <input type="hidden" name="userId" value="@user.Id" />
-                                            <button type="submit" class="btn btn-success btn-sm">
-                                                <i class="fas fa-check"></i> Approve
-                                            </button>
-                                        </form>
-                                        <form method="post" asp-action="RejectUser" class="d-inline">
-                                            <input type="hidden" name="userId" value="@user.Id" />
-                                            <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('Are you sure you want to reject this user?')">
-                                                <i class="fas fa-times"></i> Reject
-                                            </button>
-                                        </form>
-                                    }
-                                    else
-                                    {
-                                        <form method="post" asp-action="ToggleUserStatus" class="d-inline">
-                                            <input type="hidden" name="userId" value="@user.Id" />
-                                            <button type="submit" class="btn @(user.IsActive ? "btn-warning" : "btn-success") btn-sm">
-                                                <i class="fas @(user.IsActive ? "fa-user-slash" : "fa-user-check")"></i>
-                                                @(user.IsActive ? "Deactivate" : "Activate")
-                                            </button>
-                                        </form>
-                                    }
+                                    <div class="btn-group">
+                                        @if (!user.IsApproved)
+                                        {
+                                            <form method="post" asp-action="ApproveUser" class="d-inline">
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn btn-success btn-sm">
+                                                    <i class="fas fa-check"></i> Approve
+                                                </button>
+                                            </form>
+                                            <form method="post" asp-action="RejectUser" class="d-inline">
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Are you sure you want to reject this user?')">
+                                                    <i class="fas fa-times"></i> Reject
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" asp-action="ToggleUserStatus" class="d-inline">
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn @(user.IsActive ? "btn-warning" : "btn-success") btn-sm">
+                                                    <i class="fas @(user.IsActive ? "fa-user-slash" : "fa-user-check")"></i>
+                                                    @(user.IsActive ? "Deactivate" : "Activate")
+                                                </button>
+                                            </form>
+                                            <!-- ✅ NEW: Delete User Button -->
+                                            <form method="post" asp-action="DeleteUser" class="d-inline">
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
                                 </td>
                             </tr>
                         }

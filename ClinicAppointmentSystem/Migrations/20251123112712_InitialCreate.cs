@@ -350,7 +350,7 @@ namespace ClinicAppointmentSystem.Migrations
             migrationBuilder.InsertData(
                 table: "ClinicSettings",
                 columns: new[] { "Id", "AppointmentDuration", "ClinicName", "ClosingTime", "Holidays", "MaxAppointmentsPerDay", "OpeningTime", "UpdatedDate" },
-                values: new object[] { 1, 30, "Smart Clinic", new TimeSpan(0, 17, 0, 0, 0), "[]", 1, new TimeSpan(0, 9, 0, 0, 0), new DateTime(2025, 11, 22, 10, 41, 48, 267, DateTimeKind.Utc).AddTicks(5813) });
+                values: new object[] { 1, 30, "Smart Clinic", new TimeSpan(0, 17, 0, 0, 0), "[]", 1, new TimeSpan(0, 9, 0, 0, 0), new DateTime(2025, 11, 23, 11, 27, 11, 848, DateTimeKind.Utc).AddTicks(4137) });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_AppointmentId",
