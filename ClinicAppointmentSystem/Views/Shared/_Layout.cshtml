@@ -3,136 +3,254 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Clinic Appointment System</title>
+    <title>@ViewData["Title"] - Smart Clinic</title>
 
     <!-- Local CSS Files -->
     <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-hospital-alt"></i> Clinic Appointment System
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Admin" asp-action="Dashboard">
-                                        <i class="fas fa-tachometer-alt"></i> Dashboard
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Admin" asp-action="UserManagement">
-                                        <i class="fas fa-users"></i> User Management
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Admin" asp-action="Doctors">
-                                        <i class="fas fa-user-md"></i> Doctors
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Admin" asp-action="Appointments">
-                                        <i class="fas fa-calendar-check"></i> Appointments
-                                    </a>
-                                </li>
-                                <!-- ✅ ADDED: Doctor Schedules link for Admin -->
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Admin" asp-action="DoctorSchedules">
-                                        <i class="fas fa-calendar-alt"></i> Schedules
-                                    </a>
-                                </li>
-                            }
-                            else if (User.IsInRole("Staff"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Staff" asp-action="Dashboard">
-                                        <i class="fas fa-tachometer-alt"></i> Dashboard
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Staff" asp-action="Appointments">
-                                        <i class="fas fa-calendar-check"></i> Appointments
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Staff" asp-action="CreateAppointment">
-                                        <i class="fas fa-plus-circle"></i> Create Appointment
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Staff" asp-action="Patients">
-                                        <i class="fas fa-users"></i> Patients
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Staff" asp-action="Schedule">
-                                        <i class="fas fa-calendar-alt"></i> Schedule
-                                    </a>
-                                </li>
-                            }
-                            else if (User.IsInRole("Client"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Client" asp-action="Dashboard">
-                                        <i class="fas fa-tachometer-alt"></i> Dashboard
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Appointment" asp-action="Book">
-                                        <i class="fas fa-plus-circle"></i> Book Appointment
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Client" asp-action="MyAppointments">
-                                        <i class="fas fa-calendar-check"></i> My Appointments
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Client" asp-action="Profile">
-                                        <i class="fas fa-user"></i> Profile
-                                    </a>
-                                </li>
-                            }
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
-                            </li>
-                        }
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
-            </div>
-        </nav>
-    </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
-            <!-- Notification Partial -->
-            <partial name="_NotificationPartial" />
-            @RenderBody()
-        </main>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="sidebar-expanded">
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-main">
+        <div class="container-fluid">
+            <button class="navbar-toggler sidebar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <div class="brand-content">
+                    <i class="fas fa-hospital-alt brand-icon"></i>
+                    <span class="brand-text">
+                        <span class="brand-primary">Smart</span>
+                        <span class="brand-secondary">Clinic</span>
+                    </span>
+                </div>
+            </a>
+
+            <div class="navbar-content ms-auto">
+                <div class="user-info me-3">
+                    <small class="text-light">Welcome,</small>
+                    <div class="user-name">@User.Identity?.Name</div>
+                </div>
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid layout-container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-2 col-md-3 sidebar-col">
+                <nav id="sidebar" class="sidebar collapse d-lg-block">
+                    <div class="sidebar-header">
+                        <div class="user-profile">
+                            <div class="user-avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="user-details">
+                                <div class="user-name">@User.Identity?.Name</div>
+                                <div class="user-role">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <span class="badge bg-danger">Administrator</span>
+                                    }
+                                    else if (User.IsInRole("Staff"))
+                                    {
+                                        <span class="badge bg-warning">Staff</span>
+                                    }
+                                    else if (User.IsInRole("Client"))
+                                    {
+                                        <span class="badge bg-info">Patient</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-menu">
+                        <ul class="nav flex-column">
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Admin", "Dashboard"))" asp-controller="Admin" asp-action="Dashboard">
+                                            <i class="fas fa-tachometer-alt"></i>
+                                            <span class="nav-text">Dashboard</span>
+                                            <span class="nav-badge"></span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Admin", "UserManagement"))" asp-controller="Admin" asp-action="UserManagement">
+                                            <i class="fas fa-users"></i>
+                                            <span class="nav-text">User Management</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Admin", "Doctors"))" asp-controller="Admin" asp-action="Doctors">
+                                            <i class="fas fa-user-md"></i>
+                                            <span class="nav-text">Doctors</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Admin", "Appointments"))" asp-controller="Admin" asp-action="Appointments">
+                                            <i class="fas fa-calendar-check"></i>
+                                            <span class="nav-text">Appointments</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Admin", "DoctorSchedules"))" asp-controller="Admin" asp-action="DoctorSchedules">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span class="nav-text">Schedules</span>
+                                        </a>
+                                    </li>
+                                }
+                                else if (User.IsInRole("Staff"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Staff", "Dashboard"))" asp-controller="Staff" asp-action="Dashboard">
+                                            <i class="fas fa-tachometer-alt"></i>
+                                            <span class="nav-text">Dashboard</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Staff", "Appointments"))" asp-controller="Staff" asp-action="Appointments">
+                                            <i class="fas fa-calendar-check"></i>
+                                            <span class="nav-text">Appointments</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Staff", "CreateAppointment"))" asp-controller="Staff" asp-action="CreateAppointment">
+                                            <i class="fas fa-plus-circle"></i>
+                                            <span class="nav-text">Create Appointment</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Staff", "Patients"))" asp-controller="Staff" asp-action="Patients">
+                                            <i class="fas fa-users"></i>
+                                            <span class="nav-text">Patients</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Staff", "Schedule"))" asp-controller="Staff" asp-action="Schedule">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span class="nav-text">Schedule</span>
+                                        </a>
+                                    </li>
+                                }
+                                else if (User.IsInRole("Client"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Client", "Dashboard"))" asp-controller="Client" asp-action="Dashboard">
+                                            <i class="fas fa-tachometer-alt"></i>
+                                            <span class="nav-text">Dashboard</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Appointment", "Book"))" asp-controller="Appointment" asp-action="Book">
+                                            <i class="fas fa-plus-circle"></i>
+                                            <span class="nav-text">Book Appointment</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Client", "MyAppointments"))" asp-controller="Client" asp-action="MyAppointments">
+                                            <i class="fas fa-calendar-check"></i>
+                                            <span class="nav-text">My Appointments</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(IsActive("Client", "Profile"))" asp-controller="Client" asp-action="Profile">
+                                            <i class="fas fa-user"></i>
+                                            <span class="nav-text">Profile</span>
+                                        </a>
+                                    </li>
+                                }
+
+                                <!-- Common Links for All Roles -->
+                                <li class="nav-item mt-3">
+                                    <div class="nav-section-label">Account</div>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index">
+                                        <i class="fas fa-cog"></i>
+                                        <span class="nav-text">Settings</span>
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">
+                                        <i class="fas fa-user-plus"></i>
+                                        <span class="nav-text">Register</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">
+                                        <i class="fas fa-sign-in-alt"></i>
+                                        <span class="nav-text">Login</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <div class="sidebar-footer">
+                        <div class="sidebar-version">
+                            <small class="text-muted">v1.0.0</small>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <main class="col-lg-10 col-md-9 main-content-col">
+                <div class="main-content-wrapper">
+                    <!-- Breadcrumb -->
+                    <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index"><i class="fas fa-home"></i></a></li>
+                            @RenderSection("Breadcrumb", required: false)
+                        </ol>
+                    </nav>
+
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <h1 class="page-title">@ViewData["Title"]</h1>
+                        <div class="page-actions">
+                            @RenderSection("PageActions", required: false)
+                        </div>
+                    </div>
+
+                    <!-- Notification Partial -->
+                    <partial name="_NotificationPartial" />
+
+                    <!-- Main Content -->
+                    <div class="content-area">
+                        @RenderBody()
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - Clinic Appointment System - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span class="text-muted">&copy; 2024 Smart Clinic - Modern Healthcare Management</span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="text-muted">
+                        <i class="fas fa-heart text-danger"></i>
+                        Designed for better patient care
+                    </span>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -140,6 +258,128 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar functionality
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggler = document.querySelector('.sidebar-toggler');
+
+            // Auto-collapse sidebar on mobile after navigation
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 992) {
+                        const bsCollapse = new bootstrap.Collapse(sidebar, {
+                            toggle: false
+                        });
+                        bsCollapse.hide();
+                    }
+                });
+            });
+
+            // Handle sidebar state on window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 992) {
+                    sidebar.classList.add('show');
+                }
+            });
+
+            // Initialize sidebar state
+            if (window.innerWidth >= 992) {
+                sidebar.classList.add('show');
+            }
+
+            // Add active state to current page using path matching
+            const currentPath = window.location.pathname.toLowerCase();
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href) {
+                    const linkPath = href.toLowerCase();
+                    // Check if current path contains the link path or vice versa
+                    if (currentPath.includes(linkPath) || linkPath.includes(currentPath)) {
+                        link.classList.add('active');
+                    }
+                }
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Add loading states to forms
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const submitButton = this.querySelector('button[type="submit"], input[type="submit"]');
+                    if (submitButton) {
+                        const originalText = submitButton.innerHTML;
+                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                        submitButton.disabled = true;
+
+                        // Re-enable button after 10 seconds as a safety measure
+                        setTimeout(() => {
+                            submitButton.innerHTML = originalText;
+                            submitButton.disabled = false;
+                        }, 10000);
+                    }
+                });
+            });
+        });
+
+        // Helper functions for loading states
+        function showLoading(button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            button.disabled = true;
+            return originalText;
+        }
+
+        function hideLoading(button, originalText) {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(toast);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 5000);
+        }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+@functions {
+    public string IsActive(string controller, string action)
+    {
+        var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+
+        return (currentController == controller && currentAction == action) ? "active" : "";
+    }
+}
