@@ -2,113 +2,217 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="text-center hero-section">
-    <div class="container">
-        <h1 class="display-4 mb-4">Welcome to Senerity Clinic Appointment </h1>
-        <p class="lead mb-5">Efficient, reliable, and easy-to-use appointment management system for modern healthcare facilities.</p>
-
-        @if (!User.Identity?.IsAuthenticated == true)
-        {
-            <div class="row justify-content-center">
-                <div class="col-md-8">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
-                                    <h5 class="card-title">New Patient?</h5>
-                                    <p class="card-text">Create an account to book appointments and manage your healthcare needs.</p>
-                                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary">Register Now</a>
-                                </div>
+<div class="homepage-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center min-vh-80">
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <h1 class="hero-title">
+                            Welcome to
+                            <span class="brand-highlight">Serenity Clinic</span>
+                        </h1>
+                        <p class="hero-subtitle">
+                            Experience healthcare reimagined with our efficient, reliable, and patient-focused appointment management system.
+                        </p>
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <div class="stat-number">5000+</div>
+                                <div class="stat-label">Happy Patients</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">50+</div>
+                                <div class="stat-label">Expert Doctors</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">24/7</div>
+                                <div class="stat-label">Support</div>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <i class="fas fa-sign-in-alt fa-3x text-success mb-3"></i>
-                                    <h5 class="card-title">Existing User?</h5>
-                                    <p class="card-text">Login to your account to view appointments and access your dashboard.</p>
-                                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success">Login</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-image">
+                        <div class="floating-card card-1">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Easy Booking</span>
+                        </div>
+                        <div class="floating-card card-2">
+                            <i class="fas fa-clock"></i>
+                            <span>24/7 Access</span>
+                        </div>
+                        <div class="floating-card card-3">
+                            <i class="fas fa-user-md"></i>
+                            <span>Expert Doctors</span>
+                        </div>
+                        <div class="main-illustration">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Auth Section -->
+    <section class="auth-section">
+        <div class="container">
+            @if (!User.Identity?.IsAuthenticated == true)
+            {
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="section-header">
+                            <h2>Get Started Today</h2>
+                            <p>Join thousands of patients managing their healthcare with Serenity Clinic</p>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="auth-card register-card">
+                                    <div class="card-icon">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                    <h3>New Patient?</h3>
+                                    <p>Create an account to book appointments, manage your health records, and access personalized care.</p>
+                                    <ul class="feature-list">
+                                        <li><i class="fas fa-check"></i> Easy appointment booking</li>
+                                        <li><i class="fas fa-check"></i> Medical history tracking</li>
+                                    </ul>
+                                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-user-plus me-2"></i>Register Now
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="auth-card login-card">
+                                    <div class="card-icon">
+                                        <i class="fas fa-sign-in-alt"></i>
+                                    </div>
+                                    <h3>Existing User?</h3>
+                                    <p>Welcome back! Login to access your dashboard, view appointments, and manage your healthcare journey.</p>
+                                    <ul class="feature-list">
+                                        <li><i class="fas fa-check"></i> View appointments</li>
+                                        <li><i class="fas fa-check"></i> Access medical records</li>
+                                    </ul>
+                                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success btn-lg w-100">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Login to Dashboard
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-info">
-                <h4>Welcome back, @User.Identity?.Name!</h4>
-                <p>You are now logged in. Use the navigation menu to access your dashboard.</p>
-                @if (User.IsInRole("Admin"))
-                {
-                    <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-primary">Go to Admin Dashboard</a>
-                }
-                else if (User.IsInRole("Staff"))
-                {
-                    <a asp-controller="Staff" asp-action="Dashboard" class="btn btn-primary">Go to Staff Dashboard</a>
-                }
-                else if (User.IsInRole("Client"))
-                {
-                    <a asp-controller="Client" asp-action="Dashboard" class="btn btn-primary">Go to Patient Dashboard</a>
-                }
-            </div>
-        }
+            }
+            else
+            {
+                <div class="welcome-back-section">
+                    <div class="welcome-card">
+                        <div class="welcome-header">
+                            <i class="fas fa-check-circle"></i>
+                            <h2>Welcome back, @User.Identity?.Name!</h2>
+                        </div>
+                        <p>You're successfully logged in. Access your personalized dashboard to manage your healthcare needs.</p>
+                        <div class="dashboard-actions">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-light btn-lg">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Go to Admin Dashboard
+                                </a>
+                            }
+                            else if (User.IsInRole("Staff"))
+                            {
+                                <a asp-controller="Staff" asp-action="Dashboard" class="btn btn-light btn-lg">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Go to Staff Dashboard
+                                </a>
+                            }
+                            else if (User.IsInRole("Client"))
+                            {
+                                <a asp-controller="Client" asp-action="Dashboard" class="btn btn-light btn-lg">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Go to Patient Dashboard
+                                </a>
+                            }
+                            <a href="#" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-calendar me-2"></i>View Appointments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
 
-        <div class="row mt-5">
-            <div class="col-md-4 mb-4">
-                <div class="feature-card">
-                    <i class="fas fa-calendar-check fa-2x text-primary"></i>
-                    <h4>Easy Booking</h4>
-                    <p>Book appointments with your preferred doctors in just a few clicks.</p>
-                </div>
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Choose Serenity Clinic?</h2>
+                <p>Experience healthcare that puts you first with our comprehensive features</p>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="feature-card">
-                    <i class="fas fa-clock fa-2x text-success"></i>
-                    <h4>24/7 Access</h4>
-                    <p>Access your appointments and medical information anytime, anywhere.</p>
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h4>Easy Booking</h4>
+                        <p>Book appointments with your preferred doctors in just a few clicks. Real-time availability and instant confirmation.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="feature-card">
-                    <i class="fas fa-bell fa-2x text-warning"></i>
-                    <h4>Smart Reminders</h4>
-                    <p>Get timely reminders for your upcoming appointments.</p>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h4>24/7 Access</h4>
+                        <p>Access your appointments, medical records, and test results anytime, anywhere through our secure portal.</p>
+                    </div>
                 </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h4>Expert Doctors</h4>
+                        <p>Connect with board-certified specialists and experienced healthcare professionals dedicated to your well-being.</p>
+                    </div>
+                </div>
+                
             </div>
         </div>
-    </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Take Control of Your Healthcare?</h2>
+                <p>Join Serenity Clinic today and experience the future of healthcare management.</p>
+                @if (!User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="cta-buttons">
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-light btn-lg">
+                            <i class="fas fa-rocket me-2"></i>Get Started Free
+                        </a>
+                        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Existing User
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="cta-buttons">
+                        @if (User.IsInRole("Client"))
+                        {
+                            <a asp-controller="Appointment" asp-action="Book" class="btn btn-light btn-lg">
+                                <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                            </a>
+                        }
+                        <a href="#" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-question-circle me-2"></i>Get Help
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
 </div>
-
-<style>
-    .hero-section {
-        padding: 4rem 0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 10px;
-        margin: 2rem 0;
-    }
-
-    .feature-card {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 2rem;
-        border-radius: 10px;
-        text-align: center;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-        .feature-card i {
-            margin-bottom: 1rem;
-        }
-
-    .card {
-        transition: transform 0.3s ease;
-    }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-</style>
