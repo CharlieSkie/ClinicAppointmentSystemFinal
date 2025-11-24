@@ -43,6 +43,56 @@ namespace ClinicAppointmentSystem.Controllers
             return View(users);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> EditUser(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditUser(ApplicationUser model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(model.Id);
+                if (user != null)
+                {
+                    user.FirstName = model.FirstName;
+                    user.LastName = model.LastName;
+                    user.PhoneNumber = model.PhoneNumber;
+                    user.Email = model.Email;
+                    user.UserName = model.Email;
+
+                    var result = await _userManager.UpdateAsync(user);
+                    if (result.Succeeded)
+                    {
+                        TempData["SuccessMessage"] = "User updated successfully.";
+                        return RedirectToAction(nameof(UserManagement));
+                    }
+                    else
+                    {
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                    }
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "User not found.";
+                }
+            }
+
+            return View(model);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveUser(string userId)
@@ -97,7 +147,6 @@ namespace ClinicAppointmentSystem.Controllers
             return RedirectToAction(nameof(UserManagement));
         }
 
-        // ✅ NEW: Delete User
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(string userId)
@@ -164,7 +213,6 @@ namespace ClinicAppointmentSystem.Controllers
             return RedirectToAction(nameof(Doctors));
         }
 
-        // ✅ NEW: Delete Doctor
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteDoctor(int id)
@@ -222,7 +270,6 @@ namespace ClinicAppointmentSystem.Controllers
             return RedirectToAction(nameof(Appointments));
         }
 
-        // ✅ NEW: View Doctor Schedules
         public async Task<IActionResult> DoctorSchedules()
         {
             var schedules = await _context.Schedules

@@ -27,51 +27,40 @@ namespace ClinicAppointmentSystem.Controllers
         public async Task<IActionResult> Dashboard()
         {
             var today = DateTime.Today;
+
+            // Use separate async calls instead of complex anonymous type
+            var todayAppointmentsCount = await _context.Appointments
+                .CountAsync(a => a.AppointmentDate.Date == today);
+            var pendingAppointmentsCount = await _context.Appointments
+                .CountAsync(a => a.Status == "Pending");
+            var totalPatientsCount = await _context.Users
+                .CountAsync(u => u.Role == "Client" && u.IsApproved && u.IsActive);
+            var upcomingAppointmentsCount = await _context.Appointments
+                .CountAsync(a => a.AppointmentDate >= today && a.Status == "Confirmed");
+
             var dashboardStats = new
             {
-                TodayAppointments = await _context.Appointments
-                    .CountAsync(a => a.AppointmentDate.Date == today),
-                PendingAppointments = await _context.Appointments
-                    .CountAsync(a => a.Status == "Pending"),
-                TotalPatients = await _context.Users
-                    .CountAsync(u => u.Role == "Client" && u.IsApproved && u.IsActive),
-                UpcomingAppointments = await _context.Appointments
-                    .CountAsync(a => a.AppointmentDate >= today && a.Status == "Confirmed")
+                TodayAppointments = todayAppointmentsCount,
+                PendingAppointments = pendingAppointmentsCount,
+                TotalPatients = totalPatientsCount,
+                UpcomingAppointments = upcomingAppointmentsCount
             };
 
             ViewBag.DashboardStats = dashboardStats;
 
-            var todayAppointments = await _context.Appointments
-                .Include(a => a.Patient)
-                .Include(a => a.Doctor)
-                .Include(a => a.Service)
-                .Where(a => a.AppointmentDate.Date == today)
-                .OrderBy(a => a.StartTime)
-                .ToListAsync();
-
+            var todayAppointments = await GetTodayAppointmentsAsync(today);
             return View(todayAppointments);
         }
 
         public async Task<IActionResult> Appointments()
         {
-            var appointments = await _context.Appointments
-                .Include(a => a.Patient)
-                .Include(a => a.Doctor)
-                .Include(a => a.Service)
-                .OrderByDescending(a => a.AppointmentDate)
-                .ThenBy(a => a.StartTime)
-                .ToListAsync();
+            var appointments = await GetAllAppointmentsAsync();
             return View(appointments);
         }
 
         public async Task<IActionResult> CreateAppointment()
         {
-            ViewBag.Doctors = await _context.Doctors.Where(d => d.IsActive).ToListAsync();
-            ViewBag.Patients = await _context.Users
-                .Where(u => u.Role == "Client" && u.IsApproved && u.IsActive)
-                .ToListAsync();
-            ViewBag.Services = await _context.Services.Where(s => s.IsActive).ToListAsync();
-
+            await LoadCreateAppointmentViewDataAsync();
             return View();
         }
 
@@ -80,7 +69,6 @@ namespace ClinicAppointmentSystem.Controllers
         public async Task<IActionResult> CreateAppointment(
             string patientId,
             int doctorId,
-            int serviceId,
             DateTime appointmentDate,
             TimeSpan startTime,
             TimeSpan endTime,
@@ -89,23 +77,25 @@ namespace ClinicAppointmentSystem.Controllers
             try
             {
                 // Manual validation
-                if (string.IsNullOrEmpty(patientId) || doctorId == 0 || serviceId == 0)
+                if (string.IsNullOrEmpty(patientId) || doctorId == 0)
                 {
                     TempData["ErrorMessage"] = "Please fill all required fields.";
-                    return await RedirectToCreateAppointment();
+                    await LoadCreateAppointmentViewDataAsync();
+                    return View("CreateAppointment");
                 }
 
+                var appointmentId = await _appointmentService.GenerateAppointmentIdAsync();
                 var appointment = new Appointment
                 {
                     PatientId = patientId,
                     DoctorId = doctorId,
-                    ServiceId = serviceId,
+                    ServiceId = 1, // Default service ID
                     AppointmentDate = appointmentDate,
                     StartTime = startTime,
                     EndTime = endTime,
                     Notes = notes,
                     Status = "Confirmed",
-                    AppointmentId = await _appointmentService.GenerateAppointmentIdAsync(),
+                    AppointmentId = appointmentId,
                     CreatedDate = DateTime.UtcNow
                 };
 
@@ -118,18 +108,9 @@ namespace ClinicAppointmentSystem.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error creating appointment: {ex.Message}";
-                return await RedirectToCreateAppointment();
+                await LoadCreateAppointmentViewDataAsync();
+                return View("CreateAppointment");
             }
-        }
-
-        private async Task<IActionResult> RedirectToCreateAppointment()
-        {
-            ViewBag.Doctors = await _context.Doctors.Where(d => d.IsActive).ToListAsync();
-            ViewBag.Patients = await _context.Users
-                .Where(u => u.Role == "Client" && u.IsApproved && u.IsActive)
-                .ToListAsync();
-            ViewBag.Services = await _context.Services.Where(s => s.IsActive).ToListAsync();
-            return View("CreateAppointment");
         }
 
         [HttpPost]
@@ -152,29 +133,19 @@ namespace ClinicAppointmentSystem.Controllers
 
         public async Task<IActionResult> Patients()
         {
-            var patients = await _context.Users
-                .Where(u => u.Role == "Client" && u.IsApproved && u.IsActive)
-                .OrderBy(u => u.LastName)
-                .ThenBy(u => u.FirstName)
-                .ToListAsync();
+            var patients = await GetActivePatientsAsync();
             return View(patients);
         }
 
         public async Task<IActionResult> Schedule()
         {
-            var schedules = await _context.Schedules
-                .Include(s => s.Doctor)
-                .Where(s => s.IsActive)
-                .OrderBy(s => s.Doctor.Name)
-                .ThenBy(s => s.DayOfWeek)
-                .ThenBy(s => s.StartTime)
-                .ToListAsync();
+            var schedules = await GetActiveSchedulesAsync();
             return View(schedules);
         }
 
         public async Task<IActionResult> CreateSchedule()
         {
-            ViewBag.Doctors = await _context.Doctors.Where(d => d.IsActive).ToListAsync();
+            await LoadCreateScheduleViewDataAsync();
             return View();
         }
 
@@ -185,8 +156,7 @@ namespace ClinicAppointmentSystem.Controllers
             int dayOfWeek,
             TimeSpan startTime,
             TimeSpan endTime,
-            int maxAppointments,
-            bool isActive = true)
+            int maxAppointments)
         {
             try
             {
@@ -194,7 +164,8 @@ namespace ClinicAppointmentSystem.Controllers
                 if (doctorId == 0)
                 {
                     TempData["ErrorMessage"] = "Please select a doctor.";
-                    return await RedirectToCreateSchedule();
+                    await LoadCreateScheduleViewDataAsync();
+                    return View("CreateSchedule");
                 }
 
                 var schedule = new Schedule
@@ -204,7 +175,7 @@ namespace ClinicAppointmentSystem.Controllers
                     StartTime = startTime,
                     EndTime = endTime,
                     MaxAppointments = maxAppointments,
-                    IsActive = isActive
+                    IsActive = true // Always active when created
                 };
 
                 _context.Schedules.Add(schedule);
@@ -216,28 +187,20 @@ namespace ClinicAppointmentSystem.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error creating schedule: {ex.Message}";
-                return await RedirectToCreateSchedule();
+                await LoadCreateScheduleViewDataAsync();
+                return View("CreateSchedule");
             }
-        }
-
-        private async Task<IActionResult> RedirectToCreateSchedule()
-        {
-            ViewBag.Doctors = await _context.Doctors.Where(d => d.IsActive).ToListAsync();
-            return View("CreateSchedule");
         }
 
         public async Task<IActionResult> EditSchedule(int id)
         {
-            var schedule = await _context.Schedules
-                .Include(s => s.Doctor)
-                .FirstOrDefaultAsync(s => s.Id == id);
-
+            var schedule = await GetScheduleByIdAsync(id);
             if (schedule == null)
             {
                 return NotFound();
             }
 
-            ViewBag.Doctors = await _context.Doctors.Where(d => d.IsActive).ToListAsync();
+            await LoadCreateScheduleViewDataAsync();
             return View(schedule);
         }
 
@@ -254,13 +217,16 @@ namespace ClinicAppointmentSystem.Controllers
             {
                 try
                 {
+                    // Ensure schedule remains active when editing
+                    schedule.IsActive = true;
                     _context.Update(schedule);
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Schedule updated successfully.";
+                    return RedirectToAction(nameof(Schedule));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ScheduleExists(schedule.Id))
+                    if (!await ScheduleExistsAsync(schedule.Id))
                     {
                         return NotFound();
                     }
@@ -269,10 +235,9 @@ namespace ClinicAppointmentSystem.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Schedule));
             }
 
-            ViewBag.Doctors = await _context.Doctors.Where(d => d.IsActive).ToListAsync();
+            await LoadCreateScheduleViewDataAsync();
             return View(schedule);
         }
 
@@ -294,27 +259,75 @@ namespace ClinicAppointmentSystem.Controllers
             return RedirectToAction(nameof(Schedule));
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleScheduleStatus(int id)
+        // Helper methods to break down complex async operations
+        private async Task<List<Appointment>> GetTodayAppointmentsAsync(DateTime today)
         {
-            var schedule = await _context.Schedules.FindAsync(id);
-            if (schedule != null)
-            {
-                schedule.IsActive = !schedule.IsActive;
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = $"Schedule {(schedule.IsActive ? "activated" : "deactivated")} successfully.";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Schedule not found.";
-            }
-            return RedirectToAction(nameof(Schedule));
+            return await _context.Appointments
+                .Include(a => a.Patient)
+                .Include(a => a.Doctor)
+                .Include(a => a.Service)
+                .Where(a => a.AppointmentDate.Date == today)
+                .OrderBy(a => a.StartTime)
+                .ToListAsync();
         }
 
-        private bool ScheduleExists(int id)
+        private async Task<List<Appointment>> GetAllAppointmentsAsync()
         {
-            return _context.Schedules.Any(e => e.Id == id);
+            return await _context.Appointments
+                .Include(a => a.Patient)
+                .Include(a => a.Doctor)
+                .Include(a => a.Service)
+                .OrderByDescending(a => a.AppointmentDate)
+                .ThenBy(a => a.StartTime)
+                .ToListAsync();
+        }
+
+        private async Task LoadCreateAppointmentViewDataAsync()
+        {
+            ViewBag.Doctors = await GetActiveDoctorsAsync();
+            ViewBag.Patients = await GetActivePatientsAsync();
+        }
+
+        private async Task LoadCreateScheduleViewDataAsync()
+        {
+            ViewBag.Doctors = await GetActiveDoctorsAsync();
+        }
+
+        private async Task<List<Doctor>> GetActiveDoctorsAsync()
+        {
+            return await _context.Doctors.Where(d => d.IsActive).ToListAsync();
+        }
+
+        private async Task<List<ApplicationUser>> GetActivePatientsAsync()
+        {
+            return await _context.Users
+                .Where(u => u.Role == "Client" && u.IsApproved && u.IsActive)
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .ToListAsync();
+        }
+
+        private async Task<List<Schedule>> GetActiveSchedulesAsync()
+        {
+            return await _context.Schedules
+                .Include(s => s.Doctor)
+                .Where(s => s.IsActive) // Only show active schedules
+                .OrderBy(s => s.Doctor.Name)
+                .ThenBy(s => s.DayOfWeek)
+                .ThenBy(s => s.StartTime)
+                .ToListAsync();
+        }
+
+        private async Task<Schedule?> GetScheduleByIdAsync(int id)
+        {
+            return await _context.Schedules
+                .Include(s => s.Doctor)
+                .FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        private async Task<bool> ScheduleExistsAsync(int id)
+        {
+            return await _context.Schedules.AnyAsync(e => e.Id == id);
         }
     }
 }

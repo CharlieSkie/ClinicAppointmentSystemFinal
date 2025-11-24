@@ -66,18 +66,6 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label class="control-label">Service *</label>
-                                    <select name="serviceId" class="form-control" required>
-                                        <option value="">Select Service</option>
-                                        @foreach (var service in ViewBag.Services)
-                                        {
-                                            <option value="@service.Id">@service.Name - $@service.Price</option>
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
                                     <label class="control-label">Appointment Date *</label>
                                     <input name="appointmentDate" type="date" class="form-control"
                                            min="@DateTime.Today.ToString("yyyy-MM-dd")" required />

@@ -38,7 +38,6 @@ namespace ClinicAppointmentSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Book(
             int doctorId,
-            int serviceId,
             DateTime appointmentDate,
             TimeSpan startTime,
             TimeSpan endTime,
@@ -54,17 +53,17 @@ namespace ClinicAppointmentSystem.Controllers
                 }
 
                 // Manual validation
-                if (doctorId == 0 || serviceId == 0)
+                if (doctorId == 0)
                 {
                     TempData["ErrorMessage"] = "Please fill all required fields.";
-                    return await RedirectToBook();
+                    return await RedirectToBookAsync();
                 }
 
                 // Check if patient already has an appointment on the same day
                 if (!await _appointmentService.CanPatientBookAppointmentAsync(user.Id, appointmentDate))
                 {
                     TempData["ErrorMessage"] = "You already have an appointment scheduled for this day. Only one appointment per day is allowed.";
-                    return await RedirectToBook();
+                    return await RedirectToBookAsync();
                 }
 
                 // Check if the selected time slot is available
@@ -74,14 +73,14 @@ namespace ClinicAppointmentSystem.Controllers
                 if (bookedSlots > 0)
                 {
                     TempData["ErrorMessage"] = "The selected time slot is no longer available. Please choose a different time.";
-                    return await RedirectToBook();
+                    return await RedirectToBookAsync();
                 }
 
                 var appointment = new Appointment
                 {
                     PatientId = user.Id,
                     DoctorId = doctorId,
-                    ServiceId = serviceId,
+                    ServiceId = 1, // Default service ID
                     AppointmentDate = appointmentDate,
                     StartTime = startTime,
                     EndTime = endTime,
@@ -100,11 +99,11 @@ namespace ClinicAppointmentSystem.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error booking appointment: {ex.Message}";
-                return await RedirectToBook();
+                return await RedirectToBookAsync();
             }
         }
 
-        private async Task<IActionResult> RedirectToBook()
+        private async Task<IActionResult> RedirectToBookAsync()
         {
             var doctors = await _context.Doctors.Where(d => d.IsActive).ToListAsync();
             ViewBag.Doctors = doctors;
@@ -116,6 +115,12 @@ namespace ClinicAppointmentSystem.Controllers
         {
             var availableSlots = await _appointmentService.GetAvailableTimeSlotsAsync(doctorId, date);
             return Json(availableSlots);
+        }
+
+        // Additional helper method to avoid complex await expressions
+        private async Task<List<Doctor>> GetActiveDoctorsAsync()
+        {
+            return await _context.Doctors.Where(d => d.IsActive).ToListAsync();
         }
     }
 }

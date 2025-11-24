@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -32,12 +33,6 @@
             </a>
 
             <div class="navbar-content ms-auto">
-                <!--
-                <div class="user-info me-3">
-                    <small class="text-light">Welcome,</small>
-                    <div class="user-name">@User.Identity?.Name</div>
-                </div>
-                -->
                 <partial name="_LoginPartial" />
             </div>
         </div>
@@ -54,7 +49,11 @@
                                 <i class="fas fa-user-circle"></i>
                             </div>
                             <div class="user-details">
-                                <div class="user-name">@User.Identity?.Name</div>
+                                @{
+                                    var user = await UserManager.GetUserAsync(User);
+                                    var displayName = user?.FirstName + " " + user?.LastName;
+                                }
+                                <div class="user-name">@displayName</div>
                                 <div class="user-role">
                                     @if (User.IsInRole("Admin"))
                                     {
@@ -80,32 +79,32 @@
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Admin", "Dashboard"))" asp-controller="Admin" asp-action="Dashboard">
+                                        <a class="nav-link @IsActive("Admin", "Dashboard")" asp-controller="Admin" asp-action="Dashboard">
                                             <i class="fas fa-tachometer-alt"></i>
                                             <span class="nav-text">Dashboard</span>
                                             <span class="nav-badge"></span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Admin", "UserManagement"))" asp-controller="Admin" asp-action="UserManagement">
+                                        <a class="nav-link @IsActive("Admin", "UserManagement")" asp-controller="Admin" asp-action="UserManagement">
                                             <i class="fas fa-users"></i>
                                             <span class="nav-text">User Management</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Admin", "Doctors"))" asp-controller="Admin" asp-action="Doctors">
+                                        <a class="nav-link @IsActive("Admin", "Doctors")" asp-controller="Admin" asp-action="Doctors">
                                             <i class="fas fa-user-md"></i>
                                             <span class="nav-text">Doctors</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Admin", "Appointments"))" asp-controller="Admin" asp-action="Appointments">
+                                        <a class="nav-link @IsActive("Admin", "Appointments")" asp-controller="Admin" asp-action="Appointments">
                                             <i class="fas fa-calendar-check"></i>
                                             <span class="nav-text">Appointments</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Admin", "DoctorSchedules"))" asp-controller="Admin" asp-action="DoctorSchedules">
+                                        <a class="nav-link @IsActive("Admin", "DoctorSchedules")" asp-controller="Admin" asp-action="DoctorSchedules">
                                             <i class="fas fa-calendar-alt"></i>
                                             <span class="nav-text">Schedules</span>
                                         </a>
@@ -114,31 +113,31 @@
                                 else if (User.IsInRole("Staff"))
                                 {
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Staff", "Dashboard"))" asp-controller="Staff" asp-action="Dashboard">
+                                        <a class="nav-link @IsActive("Staff", "Dashboard")" asp-controller="Staff" asp-action="Dashboard">
                                             <i class="fas fa-tachometer-alt"></i>
                                             <span class="nav-text">Dashboard</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Staff", "Appointments"))" asp-controller="Staff" asp-action="Appointments">
+                                        <a class="nav-link @IsActive("Staff", "Appointments")" asp-controller="Staff" asp-action="Appointments">
                                             <i class="fas fa-calendar-check"></i>
                                             <span class="nav-text">Appointments</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Staff", "CreateAppointment"))" asp-controller="Staff" asp-action="CreateAppointment">
+                                        <a class="nav-link @IsActive("Staff", "CreateAppointment")" asp-controller="Staff" asp-action="CreateAppointment">
                                             <i class="fas fa-plus-circle"></i>
                                             <span class="nav-text">Create Appointment</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Staff", "Patients"))" asp-controller="Staff" asp-action="Patients">
+                                        <a class="nav-link @IsActive("Staff", "Patients")" asp-controller="Staff" asp-action="Patients">
                                             <i class="fas fa-users"></i>
                                             <span class="nav-text">Patients</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Staff", "Schedule"))" asp-controller="Staff" asp-action="Schedule">
+                                        <a class="nav-link @IsActive("Staff", "Schedule")" asp-controller="Staff" asp-action="Schedule">
                                             <i class="fas fa-calendar-alt"></i>
                                             <span class="nav-text">Schedule</span>
                                         </a>
@@ -147,25 +146,25 @@
                                 else if (User.IsInRole("Client"))
                                 {
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Client", "Dashboard"))" asp-controller="Client" asp-action="Dashboard">
+                                        <a class="nav-link @IsActive("Client", "Dashboard")" asp-controller="Client" asp-action="Dashboard">
                                             <i class="fas fa-tachometer-alt"></i>
                                             <span class="nav-text">Dashboard</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Appointment", "Book"))" asp-controller="Appointment" asp-action="Book">
+                                        <a class="nav-link @IsActive("Appointment", "Book")" asp-controller="Appointment" asp-action="Book">
                                             <i class="fas fa-plus-circle"></i>
                                             <span class="nav-text">Book Appointment</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Client", "MyAppointments"))" asp-controller="Client" asp-action="MyAppointments">
+                                        <a class="nav-link @IsActive("Client", "MyAppointments")" asp-controller="Client" asp-action="MyAppointments">
                                             <i class="fas fa-calendar-check"></i>
                                             <span class="nav-text">My Appointments</span>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(IsActive("Client", "Profile"))" asp-controller="Client" asp-action="Profile">
+                                        <a class="nav-link @IsActive("Client", "Profile")" asp-controller="Client" asp-action="Profile">
                                             <i class="fas fa-user"></i>
                                             <span class="nav-text">Profile</span>
                                         </a>
@@ -240,22 +239,6 @@
         </div>
     </div>
 
-    <footer class="footer">
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <span class="text-muted">&copy; 2024 Smart Clinic - Modern Healthcare Management</span>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <span class="text-muted">
-                        <i class="fas fa-heart text-danger"></i>
-                        Designed for better patient care
-                    </span>
-                </div>
-            </div>
-        </div>
-    </footer>
-
     <!-- Local JS Files -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -292,14 +275,37 @@
                 sidebar.classList.add('show');
             }
 
-            // Add active state to current page using path matching
+            // FIX: Improved active state detection - exact matching
             const currentPath = window.location.pathname.toLowerCase();
+            const currentController = '@ViewContext.RouteData.Values["Controller"]'?.toLowerCase();
+            const currentAction = '@ViewContext.RouteData.Values["Action"]'?.toLowerCase();
+            
             navLinks.forEach(link => {
                 const href = link.getAttribute('href');
                 if (href) {
                     const linkPath = href.toLowerCase();
-                    // Check if current path contains the link path or vice versa
-                    if (currentPath.includes(linkPath) || linkPath.includes(currentPath)) {
+                    // Clear existing active class
+                    link.classList.remove('active');
+                    
+                    // Exact matching for specific routes
+                    if ((currentController === 'admin' && currentAction === 'doctors' && linkPath.includes('/admin/doctors')) ||
+                        (currentController === 'admin' && currentAction === 'doctorschedules' && linkPath.includes('/admin/doctorschedules')) ||
+                        (currentController === 'admin' && currentAction === 'usermanagement' && linkPath.includes('/admin/usermanagement')) ||
+                        (currentController === 'admin' && currentAction === 'appointments' && linkPath.includes('/admin/appointments')) ||
+                        (currentController === 'admin' && currentAction === 'dashboard' && linkPath.includes('/admin/dashboard')) ||
+                        (currentController === 'staff' && currentAction === 'dashboard' && linkPath.includes('/staff/dashboard')) ||
+                        (currentController === 'staff' && currentAction === 'appointments' && linkPath.includes('/staff/appointments')) ||
+                        (currentController === 'staff' && currentAction === 'createappointment' && linkPath.includes('/staff/createappointment')) ||
+                        (currentController === 'staff' && currentAction === 'patients' && linkPath.includes('/staff/patients')) ||
+                        (currentController === 'staff' && currentAction === 'schedule' && linkPath.includes('/staff/schedule')) ||
+                        (currentController === 'client' && currentAction === 'dashboard' && linkPath.includes('/client/dashboard')) ||
+                        (currentController === 'client' && currentAction === 'myappointments' && linkPath.includes('/client/myappointments')) ||
+                        (currentController === 'client' && currentAction === 'profile' && linkPath.includes('/client/profile')) ||
+                        (currentController === 'appointment' && currentAction === 'book' && linkPath.includes('/appointment/book'))) {
+                        link.classList.add('active');
+                    }
+                    // Fallback to contains matching for other routes
+                    else if (currentPath.includes(linkPath) && linkPath !== '/') {
                         link.classList.add('active');
                     }
                 }
@@ -385,3 +391,5 @@
         return (currentController == controller && currentAction == action) ? "active" : "";
     }
 }
+
+@inject UserManager<ApplicationUser> UserManager

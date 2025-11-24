@@ -33,8 +33,8 @@
                                 <td>@user.Email</td>
                                 <td>
                                     <span class="badge
-                                            @(user.Role == "Admin" ? "bg-danger" :
-                                                                                    user.Role == "Staff" ? "bg-warning" : "bg-info")">
+                                                @(user.Role == "Admin" ? "bg-danger" :
+                                                                                        user.Role == "Staff" ? "bg-warning" : "bg-info")">
                                     @user.Role
                                 </span>
                             </td>
@@ -73,6 +73,10 @@
                                         }
                                         else
                                         {
+                                            <!-- Edit User Button -->
+                                            <a asp-action="EditUser" asp-route-userId="@user.Id" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
                                             <form method="post" asp-action="ToggleUserStatus" class="d-inline">
                                                 <input type="hidden" name="userId" value="@user.Id" />
                                                 <button type="submit" class="btn @(user.IsActive ? "btn-warning" : "btn-success") btn-sm">
@@ -80,7 +84,7 @@
                                                     @(user.IsActive ? "Deactivate" : "Activate")
                                                 </button>
                                             </form>
-                                            <!-- ✅ NEW: Delete User Button -->
+                                            <!-- Delete User Button -->
                                             <form method="post" asp-action="DeleteUser" class="d-inline">
                                                 <input type="hidden" name="userId" value="@user.Id" />
                                                 <button type="submit" class="btn btn-danger btn-sm"
