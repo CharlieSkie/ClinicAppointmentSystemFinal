@@ -231,21 +231,25 @@ namespace ClinicAppointmentSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditSchedule(Schedule model)
         {
-            if (!ModelState.IsValid)
+            if (model == null)
             {
-                await LoadCreateScheduleViewData();
-                return View(model);
+                TempData["ErrorMessage"] = "Invalid schedule data.";
+                return RedirectToAction(nameof(Schedule));
             }
 
             try
             {
-                var existingSchedule = await _context.Schedules.FindAsync(model.Id);
+                // Find the existing schedule
+                var existingSchedule = await _context.Schedules
+                    .FirstOrDefaultAsync(s => s.Id == model.Id);
+
                 if (existingSchedule == null)
                 {
                     TempData["ErrorMessage"] = "Schedule not found.";
                     return RedirectToAction(nameof(Schedule));
                 }
 
+                // Update properties
                 existingSchedule.DoctorId = model.DoctorId;
                 existingSchedule.DayOfWeek = model.DayOfWeek;
                 existingSchedule.StartTime = model.StartTime;
@@ -253,11 +257,18 @@ namespace ClinicAppointmentSystem.Controllers
                 existingSchedule.MaxAppointments = model.MaxAppointments;
                 existingSchedule.IsActive = model.IsActive;
 
+                // Save changes
                 _context.Schedules.Update(existingSchedule);
                 await _context.SaveChangesAsync();
-                
-                TempData["SuccessMessage"] = "Schedule updated successfully.";
+
+                TempData["SuccessMessage"] = "Schedule updated successfully!";
                 return RedirectToAction(nameof(Schedule));
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData["ErrorMessage"] = $"Database error: {ex.Message}";
+                await LoadCreateScheduleViewData();
+                return View(model);
             }
             catch (Exception ex)
             {
@@ -289,7 +300,7 @@ namespace ClinicAppointmentSystem.Controllers
             {
                 TempData["ErrorMessage"] = $"Error deleting schedule: {ex.Message}";
             }
-            
+
             return RedirectToAction(nameof(Schedule));
         }
 
@@ -307,11 +318,6 @@ namespace ClinicAppointmentSystem.Controllers
         private async Task LoadCreateScheduleViewData()
         {
             ViewBag.Doctors = await _context.Doctors.Where(d => d.IsActive).ToListAsync();
-        }
-
-        private async Task<bool> ScheduleExists(int id)
-        {
-            return await _context.Schedules.AnyAsync(e => e.Id == id);
         }
     }
 }

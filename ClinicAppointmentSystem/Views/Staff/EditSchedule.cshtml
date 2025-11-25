@@ -11,7 +11,6 @@
         </a>
     </div>
 
-    <!-- Add success/error message display -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -35,17 +34,14 @@
                     <h5 class="card-title">Schedule Details</h5>
                 </div>
                 <div class="card-body">
-                    <!-- FIX: Added proper form attributes and anti-forgery token -->
-                    <form asp-action="EditSchedule" method="post" id="editScheduleForm">
+                    <form method="post" asp-action="EditSchedule">
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="Id" />
-
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="DoctorId" class="control-label">Doctor *</label>
+                                    <label asp-for="DoctorId" class="form-label">Doctor *</label>
                                     <select asp-for="DoctorId" class="form-control" required>
                                         <option value="">Select Doctor</option>
                                         @foreach (var doctor in ViewBag.Doctors)
@@ -58,7 +54,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="DayOfWeek" class="control-label">Day of Week *</label>
+                                    <label asp-for="DayOfWeek" class="form-label">Day of Week *</label>
                                     <select asp-for="DayOfWeek" class="form-control" required>
                                         <option value="">Select Day</option>
                                         <option value="0">Sunday</option>
@@ -77,14 +73,14 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="StartTime" class="control-label">Start Time *</label>
+                                    <label asp-for="StartTime" class="form-label">Start Time *</label>
                                     <input asp-for="StartTime" type="time" class="form-control" required />
                                     <span asp-validation-for="StartTime" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="EndTime" class="control-label">End Time *</label>
+                                    <label asp-for="EndTime" class="form-label">End Time *</label>
                                     <input asp-for="EndTime" type="time" class="form-control" required />
                                     <span asp-validation-for="EndTime" class="text-danger"></span>
                                 </div>
@@ -94,27 +90,52 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="MaxAppointments" class="control-label">Max Appointments *</label>
+                                    <label asp-for="MaxAppointments" class="form-label">Max Appointments *</label>
                                     <input asp-for="MaxAppointments" type="number" class="form-control" min="1" max="50" required />
                                     <span asp-validation-for="MaxAppointments" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" asp-for="IsActive" /> Active Schedule
-                                    </label>
+                                <div class="form-group mb-3 pt-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" asp-for="IsActive" />
+                                        <label class="form-check-label" asp-for="IsActive">
+                                            Active Schedule
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary" id="updateButton">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Update Schedule
                             </button>
                             <a asp-action="Schedule" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Current Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Schedule ID:</strong> @Model.Id
+                    </div>
+                    <div class="mb-3">
+                        <strong>Current Doctor:</strong> @Model.Doctor?.Name
+                    </div>
+                    <div class="mb-3">
+                        <strong>Current Day:</strong> @Model.DayOfWeek
+                    </div>
+                    <div class="mb-3">
+                        <strong>Current Time:</strong> @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")
+                    </div>
                 </div>
             </div>
         </div>
@@ -127,22 +148,23 @@
     }
 
     <script>
-        // Client-side validation and form submission handling
         $(document).ready(function() {
-            // Set selected value for DayOfWeek dropdown
-            var currentDayOfWeek = @((int)Model.DayOfWeek)//;
-            $('select[name="DayOfWeek"]').val(currentDayOfWeek.toString());
+            // Set dropdown values
+            $('#DoctorId').val('@Model.DoctorId');
+            $('#DayOfWeek').val('@((int)Model.DayOfWeek)');
 
-            // Form submission handler
-            $('#editScheduleForm').on('submit', function(e) {
-                // Client-side validation
-                if (!this.checkValidity()) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
+            // Auto-dismiss alerts
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
 
-                // Add loading state to button
-                $('#updateButton').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+            // Debug form submission
+            $('form').on('submit', function(e) {
+                console.log('Form submitted');
+                console.log('DoctorId:', $('#DoctorId').val());
+                console.log('DayOfWeek:', $('#DayOfWeek').val());
+                console.log('StartTime:', $('#StartTime').val());
+                console.log('EndTime:', $('#EndTime').val());
             });
         });
     </script>
