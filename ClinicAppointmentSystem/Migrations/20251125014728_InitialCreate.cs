@@ -49,6 +49,8 @@ namespace ClinicAppointmentSystem.Migrations
                     IsApproved = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -198,9 +200,9 @@ namespace ClinicAppointmentSystem.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
+                    LoginProvider = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ProviderKey = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
+                    ProviderKey = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ProviderDisplayName = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -252,9 +254,9 @@ namespace ClinicAppointmentSystem.Migrations
                 {
                     UserId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    LoginProvider = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
+                    LoginProvider = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Name = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false)
+                    Name = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Value = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -350,7 +352,7 @@ namespace ClinicAppointmentSystem.Migrations
             migrationBuilder.InsertData(
                 table: "ClinicSettings",
                 columns: new[] { "Id", "AppointmentDuration", "ClinicName", "ClosingTime", "Holidays", "MaxAppointmentsPerDay", "OpeningTime", "UpdatedDate" },
-                values: new object[] { 1, 30, "Smart Clinic", new TimeSpan(0, 17, 0, 0, 0), "[]", 1, new TimeSpan(0, 9, 0, 0, 0), new DateTime(2025, 11, 23, 11, 27, 11, 848, DateTimeKind.Utc).AddTicks(4137) });
+                values: new object[] { 1, 30, "Smart Clinic", new TimeSpan(0, 17, 0, 0, 0), "[]", 1, new TimeSpan(0, 9, 0, 0, 0), new DateTime(2025, 11, 25, 1, 47, 28, 358, DateTimeKind.Utc).AddTicks(7730) });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_AppointmentId",

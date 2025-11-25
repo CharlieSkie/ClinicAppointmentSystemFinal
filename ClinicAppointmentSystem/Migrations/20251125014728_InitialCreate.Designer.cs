@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClinicAppointmentSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251123112712_InitialCreate")]
+    [Migration("20251125014728_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -40,6 +40,9 @@ namespace ClinicAppointmentSystem.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
@@ -55,6 +58,9 @@ namespace ClinicAppointmentSystem.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsApproved")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("LastName")
@@ -216,7 +222,7 @@ namespace ClinicAppointmentSystem.Migrations
                             Holidays = "[]",
                             MaxAppointmentsPerDay = 1,
                             OpeningTime = new TimeSpan(0, 9, 0, 0, 0),
-                            UpdatedDate = new DateTime(2025, 11, 23, 11, 27, 11, 848, DateTimeKind.Utc).AddTicks(4137)
+                            UpdatedDate = new DateTime(2025, 11, 25, 1, 47, 28, 358, DateTimeKind.Utc).AddTicks(7730)
                         });
                 });
 
@@ -400,12 +406,10 @@ namespace ClinicAppointmentSystem.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("longtext");
@@ -442,12 +446,10 @@ namespace ClinicAppointmentSystem.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Value")
                         .HasColumnType("longtext");

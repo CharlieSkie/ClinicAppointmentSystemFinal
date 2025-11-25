@@ -22,6 +22,10 @@ namespace ClinicAppointmentSystem.Models
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
+        // SOFT DELETE PROPERTIES
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedDate { get; set; }
+
         // Navigation properties
         public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 

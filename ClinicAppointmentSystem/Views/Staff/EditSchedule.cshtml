@@ -11,6 +11,23 @@
         </a>
     </div>
 
+    <!-- Add success/error message display -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="row">
         <div class="col-md-8">
             <div class="card">
@@ -18,14 +35,17 @@
                     <h5 class="card-title">Schedule Details</h5>
                 </div>
                 <div class="card-body">
-                    <form asp-action="EditSchedule" method="post">
+                    <!-- FIX: Added proper form attributes and anti-forgery token -->
+                    <form asp-action="EditSchedule" method="post" id="editScheduleForm">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="Id" />
+
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="DoctorId" class="control-label">Doctor</label>
+                                    <label asp-for="DoctorId" class="control-label">Doctor *</label>
                                     <select asp-for="DoctorId" class="form-control" required>
                                         <option value="">Select Doctor</option>
                                         @foreach (var doctor in ViewBag.Doctors)
@@ -38,8 +58,9 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="DayOfWeek" class="control-label">Day of Week</label>
+                                    <label asp-for="DayOfWeek" class="control-label">Day of Week *</label>
                                     <select asp-for="DayOfWeek" class="form-control" required>
+                                        <option value="">Select Day</option>
                                         <option value="0">Sunday</option>
                                         <option value="1">Monday</option>
                                         <option value="2">Tuesday</option>
@@ -56,14 +77,14 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="StartTime" class="control-label">Start Time</label>
+                                    <label asp-for="StartTime" class="control-label">Start Time *</label>
                                     <input asp-for="StartTime" type="time" class="form-control" required />
                                     <span asp-validation-for="StartTime" class="text-danger"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="EndTime" class="control-label">End Time</label>
+                                    <label asp-for="EndTime" class="control-label">End Time *</label>
                                     <input asp-for="EndTime" type="time" class="form-control" required />
                                     <span asp-validation-for="EndTime" class="text-danger"></span>
                                 </div>
@@ -73,7 +94,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="MaxAppointments" class="control-label">Max Appointments</label>
+                                    <label asp-for="MaxAppointments" class="control-label">Max Appointments *</label>
                                     <input asp-for="MaxAppointments" type="number" class="form-control" min="1" max="50" required />
                                     <span asp-validation-for="MaxAppointments" class="text-danger"></span>
                                 </div>
@@ -88,7 +109,7 @@
                         </div>
 
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="updateButton">
                                 <i class="fas fa-save"></i> Update Schedule
                             </button>
                             <a asp-action="Schedule" class="btn btn-secondary">Cancel</a>
@@ -104,4 +125,25 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        // Client-side validation and form submission handling
+        $(document).ready(function() {
+            // Set selected value for DayOfWeek dropdown
+            var currentDayOfWeek = @((int)Model.DayOfWeek)//;
+            $('select[name="DayOfWeek"]').val(currentDayOfWeek.toString());
+
+            // Form submission handler
+            $('#editScheduleForm').on('submit', function(e) {
+                // Client-side validation
+                if (!this.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                // Add loading state to button
+                $('#updateButton').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+            });
+        });
+    </script>
 }

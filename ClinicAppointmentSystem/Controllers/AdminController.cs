@@ -23,8 +23,8 @@ namespace ClinicAppointmentSystem.Controllers
         {
             var dashboardStats = new
             {
-                TotalUsers = await _context.Users.CountAsync(),
-                PendingApprovals = await _context.Users.CountAsync(u => !u.IsApproved),
+                TotalUsers = await _context.Users.CountAsync(u => !u.IsDeleted),
+                PendingApprovals = await _context.Users.CountAsync(u => !u.IsApproved && !u.IsDeleted),
                 TotalAppointments = await _context.Appointments.CountAsync(),
                 TodayAppointments = await _context.Appointments.CountAsync(a => a.AppointmentDate.Date == DateTime.Today),
                 TotalDoctors = await _context.Doctors.CountAsync(),
@@ -38,6 +38,7 @@ namespace ClinicAppointmentSystem.Controllers
         public async Task<IActionResult> UserManagement()
         {
             var users = await _context.Users
+                .Where(u => !u.IsDeleted) // Exclude soft-deleted users
                 .OrderByDescending(u => u.CreatedDate)
                 .ToListAsync();
             return View(users);
@@ -47,7 +48,7 @@ namespace ClinicAppointmentSystem.Controllers
         public async Task<IActionResult> EditUser(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
+            if (user == null || user.IsDeleted)
             {
                 return NotFound();
             }
@@ -62,7 +63,7 @@ namespace ClinicAppointmentSystem.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByIdAsync(model.Id);
-                if (user != null)
+                if (user != null && !user.IsDeleted)
                 {
                     user.FirstName = model.FirstName;
                     user.LastName = model.LastName;
@@ -98,7 +99,7 @@ namespace ClinicAppointmentSystem.Controllers
         public async Task<IActionResult> ApproveUser(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
+            if (user != null && !user.IsDeleted)
             {
                 user.IsApproved = true;
                 user.IsActive = true;
@@ -117,10 +118,19 @@ namespace ClinicAppointmentSystem.Controllers
         public async Task<IActionResult> RejectUser(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
+            if (user != null && !user.IsDeleted)
             {
-                await _userManager.DeleteAsync(user);
-                TempData["SuccessMessage"] = "User rejected and removed.";
+                // Soft delete instead of hard delete for rejection
+                user.IsDeleted = true;
+                user.IsActive = false;
+                user.DeletedDate = DateTime.UtcNow;
+                user.Email = $"{user.Email}.rejected.{DateTime.UtcNow.Ticks}";
+                user.UserName = $"{user.UserName}.rejected.{DateTime.UtcNow.Ticks}";
+                user.NormalizedEmail = user.Email.ToUpper();
+                user.NormalizedUserName = user.UserName.ToUpper();
+
+                await _userManager.UpdateAsync(user);
+                TempData["SuccessMessage"] = "User rejected successfully.";
             }
             else
             {
@@ -134,7 +144,7 @@ namespace ClinicAppointmentSystem.Controllers
         public async Task<IActionResult> ToggleUserStatus(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
+            if (user != null && !user.IsDeleted)
             {
                 user.IsActive = !user.IsActive;
                 await _userManager.UpdateAsync(user);
@@ -159,15 +169,45 @@ namespace ClinicAppointmentSystem.Controllers
             }
 
             var user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
+            if (user != null && !user.IsDeleted)
             {
-                await _userManager.DeleteAsync(user);
-                TempData["SuccessMessage"] = "User deleted successfully.";
+                try
+                {
+                    // SOFT DELETE: Mark as deleted instead of physically deleting
+                    user.IsDeleted = true;
+                    user.IsActive = false;
+                    user.DeletedDate = DateTime.UtcNow;
+
+                    // Update email and username to avoid conflicts if same user is recreated
+                    user.Email = $"{user.Email}.deleted.{DateTime.UtcNow.Ticks}";
+                    user.UserName = $"{user.UserName}.deleted.{DateTime.UtcNow.Ticks}";
+                    user.NormalizedEmail = user.Email.ToUpper();
+                    user.NormalizedUserName = user.UserName.ToUpper();
+
+                    var result = await _userManager.UpdateAsync(user);
+                    if (result.Succeeded)
+                    {
+                        TempData["SuccessMessage"] = "User deleted successfully.";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Error deleting user.";
+                        foreach (var error in result.Errors)
+                        {
+                            TempData["ErrorMessage"] += $" {error.Description}";
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = $"Error deleting user: {ex.Message}";
+                }
             }
             else
             {
                 TempData["ErrorMessage"] = "User not found.";
             }
+
             return RedirectToAction(nameof(UserManagement));
         }
 
